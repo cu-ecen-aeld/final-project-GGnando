@@ -1,0 +1,2 @@
+#! /bin/sh
+/usr/bin/pigpiod -g  # use /dev/gpiomem (no root)
