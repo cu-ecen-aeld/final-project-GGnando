@@ -1,2 +1,43 @@
-#! /bin/sh
-/usr/bin/pigpiod -g  # use /dev/gpiomem (no root)
+#!/bin/sh
+
+DAEMON=/usr/bin/servo_daemon
+
+case "$1" in
+    start)
+        echo "Killing any stale pigpiod…"
+        start-stop-daemon --stop --name pigpiod --quiet --oknodo
+
+        echo "Killing any stale servo_daemon…"
+        start-stop-daemon --stop --name servo_daemon --quiet --oknodo
+
+        echo "Starting servo_daemon…"
+        start-stop-daemon --start --background --quiet \
+            --exec $DAEMON
+        ;;
+    stop)
+        echo "Stopping servo_daemon…"
+        start-stop-daemon --stop --name servo_daemon --quiet --oknodo
+
+        echo "Stopping pigpiod…"
+        start-stop-daemon --stop --name pigpiod --quiet --oknodo
+        ;;
+    restart)
+        $0 stop
+        sleep 1
+        $0 start
+        ;;
+    status)
+        if start-stop-daemon --status --name servo_daemon >/dev/null; then
+            echo "servo_daemon is running."
+            exit 0
+        else
+            echo "servo_daemon is NOT running."
+            exit 1
+        fi
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart|status}"
+        exit 1
+        ;;
+esac
+exit 0
